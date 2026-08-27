@@ -229,16 +229,22 @@ img{ max-width: 100%; display: block; }
 .burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
 
 /* ============ Hero ============ */
-/* Full first screen. dvh (not vh) so mobile browser chrome doesn't push
-   the photo's bottom edge below the fold. */
+/* Full first screen. svh, not vh and not dvh:
+   - vh is the LARGE viewport (address bar hidden), so with the bar showing
+     the photo's bottom edge sits below the fold.
+   - dvh tracks the bar live. On Android Chrome the bar collapses partway
+     through a scroll, the hero's height changes under the finger and every
+     length derived from it jumps. That was the visible stutter.
+   svh is the SMALL viewport — the bar shown — so it is both the safe height
+   and a constant: it cannot change mid-scroll. */
 .hero{
   position: relative;
   overflow: hidden;
-  min-height: calc(100dvh - var(--header-h));
+  min-height: calc(100svh - var(--header-h));
   display: flex;
   align-items: center;
 }
-@supports not (height: 100dvh){
+@supports not (height: 100svh){
   .hero{ min-height: calc(100vh - var(--header-h)); }
 }
 
@@ -1634,25 +1640,50 @@ img{ max-width: 100%; display: block; }
 @media (max-width: 900px){
   /* Stack: copy on top, photo below and still bottom-flush. */
   .hero{
-    min-height: calc(100dvh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
+    flex-direction: column;
     align-items: flex-start;
     padding-top: 40px;
   }
-  /* Sized by HEIGHT here, not width: the portrait then always claims the
-     same share of the screen, so the gap between the copy and the photo
-     can't reopen on a taller handset the way width-based sizing let it. */
+  /* The portrait takes the room the copy leaves, instead of a fixed share of
+     the screen. A fixed 56% cannot know how tall the copy is, and the copy's
+     height is set by the WIDTH of the screen (the heading is 13vw, the lead
+     4.4vw) while the 56% is measured off its HEIGHT — so on any short handset
+     the two claims added up to more than the screen and the head landed on
+     the last line of the lead. As a flex item the photo simply gets what is
+     left, which cannot overlap by construction.
+     Still sized by height, so the gap between copy and photo can't reopen. */
   .hero-photo-wrap{
-    right: 50%;
-    transform: translate3d(50%, var(--parallax-y, 0px), 0);
-    /* aspect-ratio gives the absolutely-positioned box a definite width from
-       its height — width:auto alone leaves it indeterminate and the portrait
-       stretches. Matches the asset's own 675x687. */
-    height: 56%;
-    width: auto;
-    aspect-ratio: 675 / 687;
+    position: static;
+    right: auto;
+    /* The portrait is FIRST in the source — it had to be, to sit behind the
+       copy while it was absolutely positioned. In flow that order shows, so
+       put it back underneath. */
+    order: 2;
+    /* Breathing room under the last line of the lead. Only visible on short
+       screens: when the leftover space is taller than the portrait is wide the
+       picture is width-limited and the slack above it is already generous. */
+    margin-top: 14px;
+    /* basis 0, not auto: on `auto` the photo contributes its natural height to
+       the container, the hero grows to fit both instead of dividing what it
+       has, and nothing ever shrinks. On 0 it contributes nothing and simply
+       takes the free space the copy leaves. */
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
+    transform: translate3d(0, var(--parallax-y, 0px), 0);
   }
   .hero-photo-wrap picture{ height: 100%; width: 100%; }
-  .hero-photo{ height: 100%; width: 100%; object-fit: contain; }
+  /* object-position: bottom is what keeps his rule when the leftover space is
+     taller than the portrait is wide: the slack goes above the head, never
+     under it, so the bottom edge stays flush with the block. */
+  .hero-photo{
+    height: 100%; width: 100%;
+    object-fit: contain;
+    object-position: bottom;
+  }
   /* The desktop lift would tuck the wordmark under the sticky header here. */
   .hero-title{
     margin-top: 0;

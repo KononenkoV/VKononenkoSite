@@ -23,11 +23,21 @@ if (heroSection && heroLayers.length && !matchMedia('(prefers-reduced-motion: re
   let queued = false;
   let settleTimer;
   let wasOffscreen = false;
+  let lifted = false;
+  // Cached, not read per frame: offsetHeight forces a synchronous layout, and
+  // doing that inside the scroll rAF — between the style writes below — is a
+  // read-write-read cycle on every single frame. On a mid-range phone that is
+  // enough to make the drift visibly stutter.
+  let heroHeight = heroSection.offsetHeight || 1;
+
+  function measureHero() {
+    heroHeight = heroSection.offsetHeight || 1;
+    drawParallax();
+  }
 
   function drawParallax() {
     queued = false;
-    const height = heroSection.offsetHeight || 1;
-    const progress = Math.min(Math.max(window.scrollY / height, 0), 1);
+    const progress = Math.min(Math.max(window.scrollY / heroHeight, 0), 1);
 
     // Once the hero is fully scrolled past there is nothing to look at, so
     // stop repainting blurred text and drop the filters entirely.
@@ -46,22 +56,31 @@ if (heroSection && heroLayers.length && !matchMedia('(prefers-reduced-motion: re
     });
   }
 
+  // will-change is only worth its GPU memory while the scroll is active, but
+  // it must be written only when the state actually flips. Assigning it on
+  // every scroll event re-promotes the layers over and over, and each
+  // promote/demote is a repaint the eye catches as a hitch.
+  function lift(on) {
+    if (on === lifted) return;
+    lifted = on;
+    heroLayers.forEach(({ el }) => {
+      el.style.willChange = on ? 'transform, filter' : '';
+    });
+  }
+
   function onHeroScroll() {
     if (!queued) {
       queued = true;
       requestAnimationFrame(drawParallax);
     }
-    // will-change is only worth its GPU memory while the scroll is active.
-    heroLayers.forEach(({ el }) => { el.style.willChange = 'transform, filter'; });
+    lift(true);
     clearTimeout(settleTimer);
-    settleTimer = setTimeout(() => {
-      heroLayers.forEach(({ el }) => { el.style.willChange = ''; });
-    }, 180);
+    settleTimer = setTimeout(() => lift(false), 180);
   }
 
   drawParallax();
   window.addEventListener('scroll', onHeroScroll, { passive: true });
-  window.addEventListener('resize', drawParallax);
+  window.addEventListener('resize', measureHero);
 }
 
 // Mobile nav — full-screen overlay
