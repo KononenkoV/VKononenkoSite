@@ -66,5 +66,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-# Add this line once the domain is live — it needs the absolute URL:
-# Sitemap: https://ВАШ-ДОМЕН/sitemap.xml
+Sitemap: https://vkononenko.vercel.app/sitemap.xml

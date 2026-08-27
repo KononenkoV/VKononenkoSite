@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- ВНИМАНИЕ: замените example.com на реальный домен перед публикацией.
-     Sitemap требует абсолютных URL — относительные здесь недопустимы. -->
+<!-- Абсолютные URL здесь обязательны. При переезде на свой домен адрес
+     меняется тут, в robots.txt и в og:image/twitter:image в index.html. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://example.com/</loc>
+    <loc>https://vkononenko.vercel.app/</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
