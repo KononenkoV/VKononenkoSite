@@ -229,15 +229,24 @@ img{ max-width: 100%; display: block; }
 .burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
 
 /* ============ Hero ============ */
-/* The small-viewport height, published as a length the script can read.
-   window.innerHeight is the LIVE height: on Android Chrome it changes the
-   moment the address bar collapses, and anything measured from it — the tag
-   cloud sizes itself off the viewport — jumps mid-scroll. svh is the height
-   with the bar shown: the safe one, and a constant. Registered so it computes
-   to px in getComputedStyle; unregistered it would come back as the literal
-   text "100svh". */
+/* Two viewport heights, published as lengths the script can read, and both
+   of them constants — which window.innerHeight is not.
+
+   --svh is the height with the address bar SHOWN. That is the state the hero
+   is read in: it is the first screen, and the bar has not gone anywhere yet.
+
+   --lvh is the height with the bar HIDDEN. That is the state every block
+   further down is read in — by the time you have scrolled to the skills
+   block the bar has retracted, so sizing that block to svh leaves a strip of
+   the next section showing under it.
+
+   Neither may be replaced by window.innerHeight, which is the LIVE height: it
+   changes the moment the bar collapses, and anything measured from it jumps
+   mid-scroll. Both are registered so they compute to px in getComputedStyle —
+   unregistered, they would come back as the literal text "100svh". */
 @property --svh{ syntax: '<length>'; inherits: true; initial-value: 0px; }
-:root{ --svh: 100svh; }
+@property --lvh{ syntax: '<length>'; inherits: true; initial-value: 0px; }
+:root{ --svh: 100svh; --lvh: 100lvh; }
 
 /* Full first screen. svh, not vh and not dvh:
    - vh is the LARGE viewport (address bar hidden), so with the bar showing

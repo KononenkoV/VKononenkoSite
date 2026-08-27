@@ -942,16 +942,25 @@ if (sphereCloud) {
   // phone that is the LIVE viewport, and Android Chrome collapses its address
   // bar partway through a scroll — innerHeight changes, resize fires, the
   // cloud is re-laid-out under the finger and the whole field visibly jumps.
-  // --svh is the same number with the bar shown: the safe one, and one that
-  // cannot change mid-scroll. On a desktop the two are identical, so the
-  // formula there is untouched.
+  //
+  // --lvh, the height with the bar HIDDEN, is the one to size against. Nobody
+  // meets this block with the bar showing: it sits far enough down the page
+  // that the bar has always retracted by the time you get here, so measuring
+  // against svh leaves the block short and a strip of the contact panel
+  // shows underneath. Like svh it is a constant, so the jump stays fixed.
+  // On a desktop there is no bar and the two are the same number, which is
+  // why the desktop formula is untouched by any of this.
   function sViewport() {
-    const v = getComputedStyle(document.documentElement)
-      .getPropertyValue('--svh');
-    const px = parseFloat(v);
-    // Falls back wherever @property or svh is missing: an unregistered
-    // property hands back the literal "100svh", which parseFloat reads as 100.
-    return (v.indexOf('px') > -1 && px > 0) ? px : window.innerHeight;
+    const cs = getComputedStyle(document.documentElement);
+    for (const name of ['--lvh', '--svh']) {
+      const v = cs.getPropertyValue(name);
+      const px = parseFloat(v);
+      if (v.indexOf('px') > -1 && px > 0) return px;
+    }
+    // Wherever @property or the units are missing. Note an unregistered
+    // property hands back the literal "100lvh", which parseFloat reads as
+    // 100 — hence the check for px above rather than a bare parseFloat.
+    return window.innerHeight;
   }
 
   function sLayout() {
@@ -988,7 +997,12 @@ if (sphereCloud) {
     // The ratio is only a ceiling — portrait on a phone, landscape on anything
     // wider — and on a very tall window it is what stops the ellipse from
     // stretching past the shape it is meant to be.
-    const shape = sNarrow.matches ? 2.1 : 0.8;
+    // 2.4 on a phone, not 2.1: below that the ceiling, not the screen, was
+    // what cut the block short on a tall handset — the ellipse stopped
+    // growing while there was still room, and a strip of the contact panel
+    // showed under it. Above 2.4 nothing changes; the height of the screen
+    // becomes the binding term again, which is the one that should bind.
+    const shape = sNarrow.matches ? 2.4 : 0.8;
     RY = Math.max(120, Math.min((room - tallest - 12) / 2.2, RX * shape));
     sphereCloud.style.height = Math.round(RY * 2.2 + tallest + 12) + 'px';
     place();
@@ -1041,9 +1055,14 @@ if (sphereCloud) {
     const dy = e.clientY - drag.y;
     drag.x = e.clientX;
     drag.y = e.clientY;
-    const cap = MAX_SPIN * 2.4;
-    aimY = Math.max(-cap, Math.min(cap, (dx * MAX_SPIN) / 22));
-    aimX = Math.max(-cap, Math.min(cap, (-dy * MAX_SPIN) / 22));
+    // 9px of travel between two samples asks for a full MAX_SPIN. It used to
+    // take 22, and pointermove fires often enough that a normal swipe never
+    // covers 22px between two of them — which is why steering it felt like
+    // scrubbing. The ceiling is up to 4x as well, so a real flick has
+    // somewhere to go instead of saturating almost at once.
+    const cap = MAX_SPIN * 4;
+    aimY = Math.max(-cap, Math.min(cap, (dx * MAX_SPIN) / 9));
+    aimX = Math.max(-cap, Math.min(cap, (-dy * MAX_SPIN) / 9));
     // The last move with real travel in it is the shove. Read straight off the
     // final sample, a finger that slows to a stop before it lifts would leave
     // the cloud dead still.
