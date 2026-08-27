@@ -938,6 +938,22 @@ if (sphereCloud) {
   // from sitting in a short band with a field of empty page under it. The
   // ratio to the width is only a ceiling, so a tall window cannot round the
   // ellipse back into a circle.
+  // The height the block is allowed to fill. Not window.innerHeight: on a
+  // phone that is the LIVE viewport, and Android Chrome collapses its address
+  // bar partway through a scroll — innerHeight changes, resize fires, the
+  // cloud is re-laid-out under the finger and the whole field visibly jumps.
+  // --svh is the same number with the bar shown: the safe one, and one that
+  // cannot change mid-scroll. On a desktop the two are identical, so the
+  // formula there is untouched.
+  function sViewport() {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue('--svh');
+    const px = parseFloat(v);
+    // Falls back wherever @property or svh is missing: an unregistered
+    // property hands back the literal "100svh", which parseFloat reads as 100.
+    return (v.indexOf('px') > -1 && px > 0) ? px : window.innerHeight;
+  }
+
   function sLayout() {
     const w = sphereCloud.clientWidth || 1;
     let widest = 0;
@@ -968,7 +984,7 @@ if (sphereCloud) {
     // see is untouched; only the arithmetic is bent.
     const cheat = sNarrow.matches ? 0
       : parseFloat(getComputedStyle(sSection).paddingTop) / 2 || 0;
-    const room = window.innerHeight - rest - (head ? head.offsetHeight : 0) - 8 + cheat;
+    const room = sViewport() - rest - (head ? head.offsetHeight : 0) - 8 + cheat;
     // The ratio is only a ceiling — portrait on a phone, landscape on anything
     // wider — and on a very tall window it is what stops the ellipse from
     // stretching past the shape it is meant to be.
@@ -1106,8 +1122,19 @@ if (sphereCloud) {
     if (!sRunning) place();
   });
   window.addEventListener('scroll', sSync, { passive: true });
+  let sViewW = window.innerWidth;
+  let sViewSvh = sViewport();
   window.addEventListener('resize', () => {
-    sLayout();
+    // A bar collapse fires resize with the width unchanged and --svh unmoved.
+    // Nothing about the layout has changed, so don't touch it — sSync still
+    // runs, because whether the cloud is on screen genuinely may have.
+    const w = window.innerWidth;
+    const h = sViewport();
+    if (w !== sViewW || h !== sViewSvh) {
+      sViewW = w;
+      sViewSvh = h;
+      sLayout();
+    }
     sSync();
   });
   // The label boxes are the fallback face's until the web fonts land, and the

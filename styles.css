@@ -229,6 +229,16 @@ img{ max-width: 100%; display: block; }
 .burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
 
 /* ============ Hero ============ */
+/* The small-viewport height, published as a length the script can read.
+   window.innerHeight is the LIVE height: on Android Chrome it changes the
+   moment the address bar collapses, and anything measured from it — the tag
+   cloud sizes itself off the viewport — jumps mid-scroll. svh is the height
+   with the bar shown: the safe one, and a constant. Registered so it computes
+   to px in getComputedStyle; unregistered it would come back as the literal
+   text "100svh". */
+@property --svh{ syntax: '<length>'; inherits: true; initial-value: 0px; }
+:root{ --svh: 100svh; }
+
 /* Full first screen. svh, not vh and not dvh:
    - vh is the LARGE viewport (address bar hidden), so with the bar showing
      the photo's bottom edge sits below the fold.
