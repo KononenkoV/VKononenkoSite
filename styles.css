@@ -1,0 +1,1895 @@
+/* ============ Tokens ============ */
+:root{
+  --bg: #FFFFFF;
+  --ink: #14171C;
+  --ink-soft: #52585F;
+  --border: #E3E6E4;
+  /* ONE accent across the whole site — the brightest fully-saturated
+     tiffany that still clears WCAG as display type (3.03:1 on white).
+     It works everywhere because it is used as a FILL with dark text on
+     top (5.94:1), never as white-on-teal. --accent-deep is the same hue
+     darkened purely as a dark-panel background, not a second accent. */
+  --accent: #00A69D;
+  --accent-hover: #00918A;
+  --accent-deep: #04413D;
+  /* The light end of the contact panel, and the two ends of the lit gradient
+     the advantages numerals are filled with. Named rather than left loose in
+     the rules: they are the only teals on the site that are not --accent, and
+     each was picked against a measured contrast — the numeral's dark end holds
+     3.67:1 on its panel — so none of them may drift. */
+  --accent-panel: #076560;
+  --accent-lit-hi: #3FDCD1;
+  --accent-lit-lo: #00706B;
+  --accent-soft: #DEF7F5;
+  --accent-2: #FF6A3D;
+
+  /* Condensed grotesque for every heavy weight on the site: narrower
+     letterforms read as taller at the same size, while staying upright.
+     Body copy stays on Manrope for reading comfort at small sizes. */
+  --font-display: 'Oswald', system-ui, sans-serif;
+  --font-hero: var(--font-display);
+  --ink-dim: #373D45;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --container: 1160px;
+  --wrap-pad: 28px;
+  /* Shared by the hero portrait and the main nav so the menu spans exactly
+     the photo's horizontal band. */
+  --hero-photo-w: clamp(320px, 48vw, 620px);
+  /* Offset drop shadow for the logo and section headings — same geometry,
+     different weight. Units are em, not px, so one token reads the same on
+     the 18px logo and a 46px heading instead of overpowering the smaller. */
+  --shadow-heading: 0.055em 0.07em 0.045em rgba(20, 23, 28, 0.32);
+  --shadow-brand: 0.055em 0.07em 0.045em rgba(20, 23, 28, 0.19);
+  /* Nav links are only 14.5px, where the em-scaled version lands under 1px
+     and reads as nothing, so these are fixed px. The -off twin is the same
+     geometry at zero alpha — matching geometry is what lets text-shadow
+     interpolate smoothly instead of snapping on hover. */
+  --shadow-nav: 1.5px 2px 2px rgba(20, 23, 28, 0.45);
+  --shadow-nav-off: 1.5px 2px 2px rgba(20, 23, 28, 0);
+  --ease-hover: 240ms ease;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --header-h: 76px;
+  /* Experience tiles. One flat teal in every state — the brightest that
+     still carries the light grey secondary type at 4.58:1 (white sits at
+     5.34:1). Open, hover and rest differ by shadow, not by fill. */
+  --accent-tile: #007872;
+  --accent-tile-ink: #E8EFEE;
+  /* Tight and opaque rather than wide and faint: the offset stays close to
+     the edge so it reads as a lifted card, not a smudge under one. Same
+     character as --shadow-heading on the section titles. */
+  --shadow-tile: 4px 5px 6px rgba(20, 23, 28, 0.17);
+  --shadow-tile-lift: 7px 8px 9px rgba(20, 23, 28, 0.21);
+}
+
+*, *::before, *::after{ box-sizing: border-box; }
+/* The header is sticky, so an anchor jump has to stop short of it — without
+   this the section heading lands underneath the bar. */
+html{ scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 12px); }
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior: auto; }
+  *, *::before, *::after{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3{
+  font-family: var(--font-display);
+  color: var(--ink-dim);
+  margin: 0;
+  line-height: 1.16;
+  letter-spacing: 0.005em;
+  font-weight: 600;
+}
+
+p{ margin: 0 0 1em; }
+p:last-child{ margin-bottom: 0; }
+
+a{ color: inherit; text-decoration: none; }
+
+ul, ol{ margin: 0; padding: 0; list-style: none; }
+
+img{ max-width: 100%; display: block; }
+
+.wrap{
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--wrap-pad);
+}
+
+:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Text that only the screen reader needs — "(откроется в новой вкладке)"
+   after every outbound link. clip-path alone leaves it in the a11y tree. */
+.sr-only{
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============ Block titles (uniform section headings) ============ */
+.block-title{
+  font-size: clamp(2rem, 3.5vw, 2.9rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-shadow: var(--shadow-heading);
+  /* One figure for the whole site: whatever sits under a block heading starts
+     32px below it. `.block-head` carries the same number for the blocks whose
+     heading shares its line with something else. */
+  margin: 0 0 32px;
+}
+.block-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+/* ::first-letter keeps this automatic — no extra markup per heading, and
+   new sections pick it up for free. */
+.block-title::first-letter{ color: var(--accent); }
+.block-head .block-title{ margin: 0; }
+.section-sub{ color: var(--ink-soft); font-size: 16px; margin-top: 14px; }
+
+/* ============ Header ============ */
+.site-header{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px -20px rgba(20, 23, 28, 0);
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+.site-header.is-scrolled{
+  background: rgba(255,255,255,0.65);
+  box-shadow: 0 8px 24px -12px rgba(20, 23, 28, 0.16);
+}
+.header-inner{
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: var(--header-h);
+}
+.brand{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: auto;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 0.96;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-shadow: var(--shadow-brand);
+}
+.brand-line{ white-space: nowrap; }
+.brand-cap{ color: var(--accent); }
+/* The nav box still spans the portrait's band, but the links cluster in the
+   middle of it — so the menu reads as centred on the photo instead of being
+   stretched edge to edge. */
+.nav{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  width: var(--hero-photo-w);
+  flex: none;
+}
+.nav a{
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  /* Starts as the zero-alpha twin of the hover shadow so the fade-in has
+     matching geometry to interpolate against. */
+  text-shadow: var(--shadow-nav-off);
+  transition: text-shadow var(--ease-hover);
+  /* Lifts the pointer target to the 24px WCAG 2.2 minimum — the text
+     alone is only ~18px tall. */
+  padding: 6px 2px;
+}
+/* Colour stays put — the shadow alone carries the hover feedback. */
+.nav a:hover{ text-shadow: var(--shadow-nav); }
+.burger{
+  display: none;
+  width: 40px; height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.burger span{ width: 18px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.2s ease, opacity 0.2s ease; }
+.burger.is-open span:nth-child(1){ transform: translateY(6px) rotate(45deg); }
+.burger.is-open span:nth-child(2){ opacity: 0; }
+.burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
+
+/* ============ Hero ============ */
+/* Full first screen. dvh (not vh) so mobile browser chrome doesn't push
+   the photo's bottom edge below the fold. */
+.hero{
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100dvh - var(--header-h));
+  display: flex;
+  align-items: center;
+}
+@supports not (height: 100dvh){
+  .hero{ min-height: calc(100vh - var(--header-h)); }
+}
+
+/* Photo: right of centre, bottom flush with the section's bottom edge,
+   right edge on the container line so it keeps the site-wide alignment. */
+.hero-photo-wrap{
+  position: absolute;
+  bottom: 0;
+  right: max(var(--wrap-pad), calc((100% - var(--container)) / 2 + var(--wrap-pad)));
+  z-index: 0;
+  width: var(--hero-photo-w);
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+}
+.hero-photo-wrap picture{ display: block; width: 100%; }
+.hero-photo{ width: 100%; height: auto; display: block; }
+
+.hero-copy{
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* Each hero layer is driven independently by script.js through these two
+   custom properties, so the heading, the lead and the portrait travel at
+   three different speeds. Composing the transform in CSS (rather than
+   assigning element.style.transform) preserves the mobile centring
+   translate on the portrait. */
+.hero-title,
+.hero-lead{
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  filter: blur(var(--parallax-blur, 0px));
+}
+
+.hero-title{
+  /* Negative top margin lifts the block; the lead's margin pushes it down,
+     so the two move apart without changing the copy's overall centring. */
+  margin: -34px 0 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-hero);
+  font-size: clamp(2.4rem, 7.6vw, 6.2rem);
+  font-weight: 600;
+  line-height: 0.94;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-shadow: 0 6px 20px rgba(20, 23, 28, 0.21), 0 1px 2px rgba(20, 23, 28, 0.14);
+}
+.hero-title .accent{ color: var(--accent); }
+
+.hero-lead{
+  max-width: 46ch;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  /* A tenth of the way to transparent — on the element rather than in the
+     colour, so the drop shadow under the type lightens with it and the two
+     stay in step. */
+  opacity: 0.9;
+  /* Tight radius + higher opacity reads as a crisp drop shadow rather than
+     the diffuse haze a wide blur gives at this text size. */
+  text-shadow: 0 2px 5px rgba(20, 23, 28, 0.48);
+  margin: 52px 0 0;
+}
+
+/* ============ Section basics ============ */
+.section{ padding: 88px 0; }
+
+/* ============ Advantages (dark) ============ */
+/* Near-black panel with a soft top glow, so the accent numerals read as
+   lit type rather than flat fill. Lightest point of the gradient (#23272C)
+   still gives the accent 4.97:1 and white 15:1. */
+.advantages{
+  background: radial-gradient(120% 100% at 50% 0%, #23272C 0%, #16191D 58%, #0F1216 100%);
+  color: #fff;
+}
+/* The cards carry transform and filter, so each one is its own stacking
+   context and would otherwise paint over the heading on the way out. Lifting
+   the heading keeps the departing numerals passing underneath it. */
+.advantages .block-title{ color: #fff; position: relative; z-index: 2; }
+
+/* Twelve tracks so 3-up, 2-up and 1-up all divide cleanly and the odd card
+   can be centred in its row at any of them. */
+.advantages-grid{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 58px 32px;
+  position: relative;
+  z-index: 1;
+}
+/* script.js sizes the numerals: one height for all five, set to 130% of the
+   tallest card's text block, each centred on its own copy. The values below
+   are the pre-script fallback — they keep the card sane if the font metrics
+   or the script are unavailable. */
+.advantage-card{
+  --num-size: clamp(104px, 10vw, 172px);
+  --num-inset: calc(var(--num-size) * 0.52);
+  --num-overhang: calc(var(--num-size) * 0.14);
+  --num-top: 0px;
+  grid-column: span 4;
+  position: relative;
+  padding-block: var(--num-overhang);
+}
+/* 1 2 3 across the top; 4 and 5 sit on tracks 3–10, which centres the pair
+   under the three above. */
+.advantage-card:nth-child(4){ grid-column: 3 / span 4; }
+
+.advantage-num{
+  position: absolute;
+  top: var(--num-top);
+  left: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--num-size);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+  z-index: 0;
+}
+/* Light left-to-right fall-off so the numeral reads as a lit solid rather
+   than a flat swatch. The dark end still holds 3.67:1 on the panel, which
+   display type at this size needs. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)){
+  .advantage-num{
+    background-image: linear-gradient(90deg, var(--accent-lit-hi) 0%, var(--accent) 46%, var(--accent-lit-lo) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+/* The copy clears the numeral's ink by a fixed gap, so nothing is ever set
+   over the accent and no contour is needed to hold it legible. */
+.advantage-body{
+  position: relative;
+  z-index: 1;
+  padding-left: var(--num-inset);
+}
+.advantage-card h3{
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.advantage-card p{
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+}
+
+/* ---- Advantages: entrance ----
+   Cards arrive 1→5, and inside each one the numeral leads, then the heading,
+   then the copy. Delays are composed from a per-card offset so the order holds
+   however the grid rewraps. */
+.advantage-card:nth-child(1){ --card-delay: 0ms; }
+.advantage-card:nth-child(2){ --card-delay: 150ms; }
+.advantage-card:nth-child(3){ --card-delay: 300ms; }
+.advantage-card:nth-child(4){ --card-delay: 450ms; }
+.advantage-card:nth-child(5){ --card-delay: 600ms; }
+
+.advantage-num,
+.advantage-card h3,
+.advantage-card p{
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 560ms ease var(--enter-delay, 0ms),
+    transform 560ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--enter-delay, 0ms);
+}
+.advantage-num{ --enter-delay: var(--card-delay); }
+.advantage-card h3{ --enter-delay: calc(var(--card-delay) + 120ms); }
+.advantage-card p{ --enter-delay: calc(var(--card-delay) + 240ms); }
+
+.advantages.is-in .advantage-num,
+.advantages.is-in .advantage-card h3,
+.advantages.is-in .advantage-card p{
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Advantages: exit parallax ----
+   Composed in the stylesheet, same as the hero, so the script only writes two
+   numbers per card and never owns the transform. */
+.advantage-card{
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  filter: blur(var(--parallax-blur, 0px));
+}
+
+@media (prefers-reduced-motion: reduce){
+  .advantage-num,
+  .advantage-card h3,
+  .advantage-card p{
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .advantage-card{ transform: none; filter: none; }
+}
+
+/* ============ About ============ */
+.about-grid{
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 56px;
+  align-items: start;
+}
+/* Side by side here, stacked on a phone — either way it is the grid's gap that
+   spaces the two, so the heading does not add its own on top of it. */
+.about-grid .block-title{ margin-bottom: 0; }
+.about-body p{ color: var(--ink-soft); font-size: 16px; }
+/* Body copy sits on --ink-soft, so bold alone would barely register — the
+   emphasis comes from weight and the darker ink together. */
+.about-body strong{ font-weight: 700; color: var(--ink); }
+
+.about-footnote{
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr;
+  gap: 28px;
+}
+/* One label device for the whole site: mono, uppercase, wide tracking.
+   The About footnote and the Обязанности/Достижения headings inside the
+   experience panels are the same kind of thing, so they share the rule. */
+.footnote-label,
+.job-group-label{
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  margin-bottom: 8px;
+}
+/* These three head their own columns of running text, so they have to out-rank
+   it: a label set smaller than what it introduces reads as a caption. Tracking
+   comes down as the size goes up — 0.08em on 15px would push «ВЫСШЕЕ
+   ОБРАЗОВАНИЕ» onto two lines — and the ink goes to --ink-soft, since dim type
+   at heading size looks faded rather than quiet. */
+.footnote-label{
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.about-footnote p{ font-size: 13px; color: var(--ink-soft); margin: 0; }
+.footnote-link{
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* ============ Experience timeline ============
+   Seven roles as a vertical accordion of tiles. Two separate structures:
+   the rail with its markers runs down the left edge of the block on its
+   own, and the roles sit beside it as detached tiles. The rail spans the
+   whole block rather than stopping at the markers, so it reads as one
+   continuous span of years that the tiles hang off.
+
+   Each tile is split like a card: the header carries the accent fill with
+   light type, the body underneath is a light ground with dark type. Long
+   copy stays on the light half, where it can hold 6:1 instead of fighting
+   a saturated background. */
+.timeline{
+  position: relative;
+  padding-left: 46px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.timeline::before{
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+/* The light ground shows only where the panel is open — closed, the header
+   covers the tile completely. */
+.job{
+  position: relative;
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-tile);
+}
+/* `translate`, not `transform`, for the hover: these tiles are .motion-item,
+   whose entrance and parallax both own `transform` on the same element. The
+   transition list has to be restated here at a higher specificity, because
+   `transition` is a single property — .motion-item's declaration replaces
+   the whole list rather than merging with it, and the hover would snap while
+   the marker inside it eased. Its two entrance timings are repeated so
+   nothing is lost. */
+.timeline .job{
+  transition:
+    opacity 560ms ease var(--enter-delay, 0ms),
+    --enter-y 560ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--enter-delay, 0ms),
+    box-shadow var(--ease-hover),
+    translate var(--ease-hover);
+}
+/* Hover slides the tile out from under its own shadow rather than changing
+   the fill — every step brighter drops the grey secondary type below 4.5:1,
+   so the feedback has to come from movement. */
+.job:hover,
+.job.is-open{ box-shadow: var(--shadow-tile-lift); }
+.job:hover{ translate: -8px 0; }
+
+/* The whole collapsed tile is the control, so the hit target is the full
+   width rather than a chevron the size of a thumbnail. */
+.job-head{ margin: 0; font: inherit; }
+.job-summary{
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 22px;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 26px;
+  background: var(--accent-tile);
+  border: 0;
+  border-radius: var(--radius);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--ease-hover);
+}
+.job.is-open .job-summary{ border-radius: var(--radius) var(--radius) 0 0; }
+.job-summary:focus-visible{ outline: 2px solid #fff; outline-offset: -4px; }
+/* The marker hangs off the summary, not the whole tile, and is centred on
+   it with a transform — so it tracks the header's real height at any
+   breakpoint instead of a hardcoded offset, and stays put when the panel
+   below it opens. */
+.job-summary::before{
+  content: "";
+  position: absolute;
+  left: -46px;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  transform: translateY(-50%);
+  transition: border-color var(--ease-hover), background var(--ease-hover),
+              transform var(--ease-hover), translate var(--ease-hover);
+}
+/* The marker belongs to the rail, not to the tile, but it lives inside the
+   element that slides on hover. Cancelling the slide on the marker keeps it
+   sitting on the line while the tile moves out from under it. Same property
+   and same timing as the tile, so the two stay exactly in step. */
+.job:hover .job-summary::before{ translate: 8px 0; }
+.job:hover .job-summary::before,
+.job.is-open .job-summary::before{
+  border-color: var(--accent);
+  background: var(--accent);
+  transform: translateY(-50%) scale(1.2);
+}
+
+/* Every value in the header is pure white. Transparency was tempting for
+   hierarchy, but at 82% the secondary lines drop to 3.6:1 against the
+   bright end of the gradient — so the hierarchy comes from size and weight
+   instead, and the contrast stays. */
+.job-org{
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 1.9vw, 25px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.015em;
+  /* Body line-height would leave a 100px collapsed row; seven of those is
+     most of a screen before anything is even opened. */
+  line-height: 1.2;
+  color: #fff;
+}
+.job-role{
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--accent-tile-ink);
+  margin-top: 5px;
+}
+/* The range leads and the tenure sits under it as the smaller detail. The
+   white chip that used to hold the duration is gone: it was the loudest
+   object on the tile for the least important reason, a container around a
+   fact. Neither line uses the mono any more — a monospace sets every glyph
+   on the same wide advance, and a full date range in it reads stretched. */
+.job-when{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+/* Lower case and a step down from the company name: in caps at the same
+   weight the two lines competed for the same rank across the tile. */
+.exp-dates{
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  line-height: 1.2;
+  color: #fff;
+  white-space: nowrap;
+}
+.exp-duration{
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-tile-ink);
+  white-space: nowrap;
+}
+.job-chevron{
+  width: 22px;
+  height: 22px;
+  color: #fff;
+  transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.job.is-open .job-chevron{ transform: rotate(180deg); }
+
+/* Animating grid-template-rows lets the panel open to the height of its
+   own content — no measuring in JS, and it stays right when the copy
+   reflows at a different width. */
+.job-panel{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.job.is-open .job-panel{ grid-template-rows: 1fr; }
+.job-panel-clip{ overflow: hidden; }
+.job-panel-inner{
+  padding: 26px 26px 30px;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.job.is-open .job-panel-inner{ opacity: 1; transition-delay: 140ms; }
+
+.job-place{
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0 0 22px;
+}
+.job-place a{ color: var(--ink); border-bottom: 1px solid rgba(20, 23, 28, 0.3); }
+.job-place a:hover{ border-bottom-color: var(--ink); }
+/* Larger than the bullets it introduces — at the shared 11.5px it read as
+   a footnote sitting on top of bigger text. */
+.job-group-label{ font-size: 13px; color: var(--ink); }
+.job-group + .job-group{ margin-top: 26px; }
+.job-panel ul{ display: flex; flex-direction: column; gap: 9px; }
+.job-panel li{
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  padding-left: 18px;
+  position: relative;
+}
+.job-panel li::before{
+  content: "";
+  position: absolute;
+  left: 0; top: 9px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+.job-panel li a{ color: var(--ink); font-weight: 600; border-bottom: 2px solid var(--accent); }
+.exp-attachment{
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(20, 23, 28, 0.22);
+  /* Block-level so the dashed rule spans the panel instead of stopping at
+     the end of the link text. */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.exp-attachment:hover{ color: var(--accent-hover); }
+.exp-attachment svg{ width: 16px; height: 16px; flex: none; }
+
+/* ============ Projects carousel ============
+   One project on screen at a time, and each one shows the whole set of
+   screens it was documented with rather than a single cover shot. The set
+   is laid out as an equal-height strip: matching heights are what make a
+   row of screenshots read as one exhibit, and because only the height is
+   fixed, every shot keeps its own proportions — phone screens sit at
+   ~0.46 wide-to-tall next to dashboards at ~1.86, none of them cropped.
+
+   The colours are the ones the rest of the page already uses: the media
+   band is the dark panel from Преимущества pulled into the accent hue, the
+   card below it is the light half of an Опыт tile, and the award keeps the
+   one warm chip the site allows itself. */
+.case-nav{ display: flex; align-items: center; gap: 12px; flex: none; }
+/* Outlined on white in both states — no accent fill on either button. */
+.case-btn{
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color var(--ease-hover), background var(--ease-hover), color var(--ease-hover), opacity var(--ease-hover);
+}
+.case-btn svg{ width: 20px; height: 20px; }
+.case-btn:hover{ border-color: var(--accent); background: var(--accent-soft); }
+.case-btn[disabled]{ opacity: 0.35; cursor: default; }
+.case-btn[disabled]:hover{ border-color: var(--border); background: var(--bg); }
+
+/* The track bleeds to the viewport edges so a swipe on a phone starts at
+   the screen edge, and the padding puts the slide back on the site grid.
+
+   overflow:hidden here is load-bearing, not tidiness: the track is a
+   horizontal scroll container holding 15 slides, and with every ancestor
+   left `visible` its 16,900px of scrollable content was being added to the
+   PAGE's scroll area — document.scrollWidth read 6,889 against a 1,280
+   viewport, and the whole site scrolled sideways into empty space. Clipping
+   the axis at the carousel stops the leak; the track keeps scrolling
+   normally inside it. */
+.case-carousel{
+  margin: 0 calc(var(--wrap-pad) * -1);
+  overflow: hidden;
+  /* `overflow: hidden` clips what is painted but does not stop the track's
+     15 000px of slides from being counted into the page's own scroll width.
+     Normally the entrance transform on .motion-item makes this box a
+     containing block and the figure never escapes — but under
+     prefers-reduced-motion that transform is `none`, and the page picked up
+     12 545px of horizontal scroll. Paint containment states the intent
+     outright instead of leaning on a transform that is allowed to disappear. */
+  contain: paint;
+}
+.case-track{
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Slides keep their own height instead of stretching to the tallest. The
+     track is still as tall as the tallest one, so nothing jumps as you page
+     through — a short case simply ends earlier. Stretching instead handed
+     the surplus to the dark band, which on a phone left one small screenshot
+     floating in 400px of green. */
+  align-items: flex-start;
+  /* Height follows the slide on screen (set in JS), so a case with a client
+     quote can be taller than one without instead of every slide inheriting
+     the tallest one's height and trailing dead space. Vertical overflow is
+     clipped rather than scrolled: only off-screen slides ever exceed the
+     current height, and they must not raise a scrollbar of their own. */
+  overflow-y: hidden;
+  transition: height 300ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  scroll-padding: 0 var(--wrap-pad);
+  padding: 6px var(--wrap-pad) 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.case-track::-webkit-scrollbar{ display: none; }
+.case-track:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius); }
+
+.case{
+  scroll-snap-align: start;
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-tile);
+}
+
+/* ---- Media band ---- */
+/* Screenshots sit on plain white with nothing drawn around them — no frame,
+   no rule between the picture and the copy. The card's own edge is the only
+   boundary the reader needs. */
+/* The picture gets a tighter inset than the copy — 20px on all four sides,
+   the same above, beside and below it. Matching the 32px text margin instead
+   would cost the screenshots 24px of width for no gain: the copy needs a
+   margin to be readable, the artwork does not. */
+.case-media{
+  flex: 0 0 auto;
+  background: var(--bg);
+  padding: 20px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Wide variant ----
+   One landscape screenshot, filling the width the card's padding leaves it.
+   The doubled class is deliberate: the generic `img:only-child` rule below
+   carries the same specificity and would win on source order otherwise. */
+.case.case--wide .case-shots{ width: 100%; }
+.case.case--wide .case-shots img{
+  width: 100%;
+  height: auto;
+  max-height: none;
+  border-radius: var(--radius-sm);
+}
+/* ---- Aside variant ----
+   Two full-page screenshots are tall, and a tall picture laid into a
+   horizontal band has to shrink to nothing to fit. Here they stand down the
+   left of the card at their own height and the copy sits beside them; the
+   head still spans both columns. */
+/* 1.78 is where the two columns run out together: any wider and the copy
+   narrows enough to grow a line, which puts the text past the shots again. */
+.case--aside{ display: grid; grid-template-columns: minmax(0, 1.78fr) minmax(0, 1fr); }
+.case--aside .case-head{ grid-column: 1 / -1; }
+/* Symmetric padding, because here the shots reach the foot of the card and
+   the gap under them has to match the one above. */
+.case--aside .case-media{ padding: 20px 0 20px 20px; align-items: stretch; }
+.case--aside .case-body{ padding: 22px 32px 32px; }
+/* Pinned to the top rather than centred: the first line of the description
+   sits level with the top of the screenshots, whichever column is taller. */
+.case--aside .case-shots{ align-items: flex-start; }
+/* Page screenshots run to their own edge with no chrome around them, so on the
+   white card they read as loose colour rather than as a screen. A hairline
+   gives them an edge; box-shadow rather than border, because it follows the
+   corner radius and costs the layout nothing. */
+.case--aside .case-shots img{ box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink-dim) 30%, transparent); }
+.case-shots{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 0 auto;
+}
+/* Only the height is set, so the width is whatever the shot's own
+   proportions ask for. */
+.case-shots img{
+  height: clamp(190px, 25vw, 340px);
+  width: auto;
+  max-width: 100%;
+  border-radius: 6px;
+}
+/* A strip that fills the card's width. flex-basis is 0 and flex-grow is the
+   shot's share of the strip's total ratio, so the widths come out in
+   proportion to the ratios — which is exactly the condition for the heights
+   to come out equal. No fixed height is set anywhere; it falls out of the
+   width. The grow figures are normalised to sum to 1 rather than being the
+   raw ratios: a strip of narrow phone screens sums to less than 1, and flex
+   then hands out only that fraction of the free space, leaving the rest as
+   slack the strip is centred in. --ar is the fallback, correct wherever the
+   ratios happen to sum past 1. */
+.case-shots--fill{ width: 100%; flex-wrap: nowrap; }
+.case-shots--fill img{
+  flex: var(--gr, var(--ar)) 1 0;
+  min-width: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+}
+/* Four wide screens of one site. In a single row they would come out 250px
+   across with their type illegible, so they break into two rows of two — each
+   one then gets half the card and stays a readable screenshot. */
+.case-shots--grid{ flex-wrap: wrap; }
+.case-shots--grid img{ flex: 0 0 calc(50% - 8px); }
+/* Shots of a light site: a white page on a white card has no edge of its own,
+   so it needs the same hairline the aside shots carry. box-shadow rather than
+   border, because it follows the corner radius and costs the layout nothing. */
+.case-shots--ring img{ box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink-dim) 30%, transparent); }
+/* One screenshot cut along the gaps between its phones. With no gutters the
+   pieces close back up into the picture they came from, so the wide card is
+   unchanged — but on a phone they can wrap two-up like any other strip. */
+.case-shots--seam{ gap: 0; }
+/* Rounded only where the strip meets the card; the seams stay square, or the
+   corners cut white notches into artwork that runs to its own edge. */
+.case-shots--seam img{ border-radius: 0; }
+.case-shots--seam img:first-child{ border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.case-shots--seam img:last-child{ border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+/* A project documented with a single shot has no strip to line up with, so
+   it is free to fill the band instead of being pinned to a shared height. */
+.case-shots img:only-child{
+  height: auto;
+  width: auto;
+  /* Lower than the strip's ceiling would suggest, because this one image is
+     what sets the height of every slide in the carousel — all fifteen are as
+     tall as the tallest, and at 440px the card stopped fitting a laptop. */
+  max-height: 360px;
+  max-width: 100%;
+}
+
+/* ---- Body ---- */
+/* ---- Head ----
+   The same band as an Опыт tile: one flat teal, white name, light grey
+   subtitle, and the same type sizes — so a project header and a job header
+   read as the same kind of object across two sections. */
+.case-head{
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 22px 32px;
+  background: var(--accent-tile);
+}
+/* Name and kind share a line and a baseline — the size difference carries
+   the hierarchy, so neither needs a row of its own. */
+.case-title{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+  min-width: 0;
+}
+.case-name{
+  font-size: clamp(22px, 1.9vw, 25px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.015em;
+  line-height: 1.2;
+  color: #fff;
+}
+.case-kind{
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--accent-tile-ink);
+}
+/* The period this card covers, held at the far end of the header bar in the
+   same display face as the card's name — it reads as the second half of the
+   heading rather than as a note pinned beside it. */
+.case-years{
+  flex: none;
+  white-space: nowrap;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 1.9vw, 25px);
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  line-height: 1.2;
+  color: #fff;
+}
+
+/* ---- Body: description, award, client quote ---- */
+/* 20px, so the gap under the picture matches the one above it; the copy's
+   own 32px side margin is unaffected. */
+.case-body{
+  flex: none;
+  padding: 20px 32px 32px;
+}
+/* Description on the left, award on the right — the award is a fixed-size
+   object and does not want a full-width column it cannot fill. */
+.case-cols{ display: grid; gap: 32px; }
+.case-cols--split{ grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr); }
+.case-desc{ display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+/* Section headings inside a card. Set at the size of the client's name in
+   the quote below them, so a heading never reads as smaller than the line it
+   introduces. */
+.case-subhead{
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  /* line-height and margin are stated outright because --award-inset-top
+     below is computed from them. */
+  line-height: 1.2;
+  color: var(--ink-dim);
+  margin: 0 0 12px;
+}
+.case-text{
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 68ch;
+}
+/* A description can run to several paragraphs. */
+.case-text + .case-text{ margin-top: 14px; }
+/* Opt-out of the 68ch measure, card by card. 68ch is where running text stops
+   being comfortable, so it stays the default — but a write-up of four long
+   paragraphs stacks into a card half again as tall as its neighbours, and in a
+   carousel where every slide is read at the same scroll position that height
+   costs more than the ideal line length does. Only the description opts out:
+   the client quote below it keeps its own cap, since it is a short block and
+   is set two sizes smaller. Desktop only — below 900px the holder is already
+   narrower than the cap, so the rule would have nothing to undo. */
+@media (min-width: 901px){
+  .case--fulltext .case-text{ max-width: none; }
+}
+
+/* ---- Several projects on one card ----
+   One row per project: the client's logo on the left, its own description on
+   the right. The logo sits on the middle of the block it belongs to, and the
+   rows are told apart by the space between them rather than by rules drawn
+   across the card. */
+.case--multi .case-body{ padding: 28px 32px 32px; }
+.multi-rows{ display: grid; gap: 34px; }
+.multi-row{
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+}
+/* Three logos at three different proportions. Capping the height and the width
+   at once holds them to one visual weight; height alone would let the widest
+   of them run half again as long as the others. */
+.multi-logo img{
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 86px;
+}
+.multi-copy{ min-width: 0; }
+
+/* ---- Award ----
+   Just the certificate: no plate behind it, no shadow, no caption. The sheet
+   already carries the contest, the medal and the nomination in its own type,
+   and every frame drawn around it over the last few passes was repeating what
+   the image says. It fills the height of the copy beside it and keeps its own
+   proportions inside that box — object-fit never stretches it.
+
+   The slot is the grid item and the award is absolute inside it, so the
+   certificate contributes nothing to the row's height: the copy on the left
+   sets it and the image matches. min-height is the floor for slides whose
+   copy runs only a couple of lines. */
+/* Top edge level with the first line of the description, bottom edge level
+   with the last line of the quote — not with the column's own box, which
+   starts at the heading and ends under the signature. */
+.case-award-slot{
+  position: relative;
+  min-width: 0;
+  min-height: 300px;
+  margin-top: var(--award-inset-top);
+}
+.case-cols--quoted .case-award-slot{ margin-bottom: var(--award-inset-bottom); }
+.case-award{
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  display: block;
+  transition: translate var(--ease-hover);
+}
+.case-award:hover{ translate: -3px 0; }
+.case-award-shot{ display: block; height: 100%; }
+/* Height is fixed by the alignment, the ratio is fixed by the certificate —
+   so the width is what gives. contain letterboxes it inside the column
+   rather than cropping the signatures off the bottom. */
+.case-award-shot img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* ---- Case link ---- */
+.case-link{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 3px;
+  transition: color var(--ease-hover), border-color var(--ease-hover);
+}
+.case-link svg{ width: 14px; height: 14px; flex: none; color: var(--accent); }
+.case-link:hover{ color: var(--accent-hover); border-bottom-color: var(--accent-hover); }
+
+/* ---- Client quote ---- */
+/* No left rule and no indent: the heading already names the block, and an
+   indent here was the one thing in the card that did not start on the same
+   left edge as everything else. */
+.case-quote{
+  margin: 32px 0 0;
+  max-width: 68ch;
+}
+
+.case-quote blockquote{
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.case-quote figcaption{ margin-top: 12px; }
+/* How far the award has to be held off the top and bottom of its column to
+   line up with the copy rather than with the column box: the heading above
+   the first paragraph, and the signature below the last one. Written as sums
+   of the exact values declared on those elements, so changing a size in one
+   place does not quietly break the alignment. */
+:root{
+  --award-inset-top: calc(17px * 1.2 + 12px);
+  --award-inset-bottom: calc(12px + 16px * 1.2 + 2px + 11.5px * 1.45);
+}
+/* Same reason as .case-subhead: --award-inset-bottom is derived from these. */
+.case-quote-name{
+  display: block;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--ink-dim);
+}
+.case-quote-role{
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* ---- Pager ----
+   One segment per case. The strip doubles as the position indicator and as
+   the way to jump: with fifteen cases, paging with the arrows alone means
+   fourteen clicks to reach the last one. */
+.case-steps{
+  display: flex;
+  gap: 4px;
+  margin: 0 var(--wrap-pad);
+}
+.case-step{
+  flex: 1;
+  /* The bar is 4px; the button around it is 24px so the target clears the
+     WCAG minimum without a 24px band of visible chrome. */
+  height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.case-step span{
+  display: block;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background var(--ease-hover);
+}
+.case-step:hover span{ background: var(--accent-hover); }
+.case-step[aria-current="true"] span{ background: var(--accent); }
+.case-step:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---- Earlier work ---- */
+.proj-links{ display: flex; flex-wrap: wrap; gap: 8px; }
+/* On the closing slide the sites are the content, not a footnote to it, so
+   they run as an even grid rather than a ragged wrap: equal cells, one column
+   fewer each time the card narrows. */
+.case--links .proj-links{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+  /* .case-desc packs its children to the start, so a grid left to itself
+     collapses to one column's worth of width. */
+  align-self: stretch;
+}
+/* Each site says what it was and what the work on it was, so the pill becomes
+   a small card: three lines, ranged left, corners of the card family rather
+   than the fully round ones a bare domain wore. */
+.case--links .proj-links a,
+.case--links .proj-links .proj-link-static{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  height: 100%;
+  padding: 15px 18px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+/* The domain is the link, so it carries the accent — but at 12.5px the bright
+   tiffany sits at 3:1, which is display-type contrast, not reading contrast.
+   --accent-tile is the same hue at 5.34:1, the tone the site already uses when
+   the accent has to carry small type. */
+.proj-link-host{ color: var(--accent-tile); font-weight: 700; }
+.proj-links a:hover .proj-link-host{ color: var(--accent-deep); }
+.proj-link-note{
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+}
+/* The kind of work is the one thing repeated down the whole grid, so it is set
+   quietest of the three — it reads as a column of labels, not as copy. */
+.proj-link-work{
+  margin-top: auto;
+  padding-top: 4px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: 0.75;
+}
+.proj-links a,
+.proj-links .proj-link-static{
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  transition: color var(--ease-hover), border-color var(--ease-hover), background var(--ease-hover);
+}
+.proj-links a:hover{ color: var(--ink); border-color: var(--accent); background: var(--accent-soft); }
+
+/* ============ Skills ============
+   One turning cloud of words, with no headings dividing it and nothing behind
+   it. What follows is in two halves: the plate — the box a label sits in, and
+   the base the cloud is built on — and then the sphere rules, which take that
+   plate apart again and leave the word. The script writes every position, so
+   nothing here places anything. */
+/* No ground of its own. Projects above declares no background either and
+   stands on the page's white, so the two blocks run together with nothing
+   between them and the words are the only thing in the section. */
+.skills{
+  position: relative;
+}
+
+.skills > .wrap{ position: relative; z-index: 1; }
+
+/* ---- The grid ----
+   What the block falls back to when the script does not run: a real grid of
+   equal plates, one per skill, lined up down the columns as well as across the
+   rows. With the script, the sphere rules further down take this apart and the
+   words are laid on a turning ellipse instead — so nothing here is what the
+   reader normally sees, and all of it is what they see if the script fails.
+   `1fr` on the auto rows keeps the plates equal without a magic number: every
+   row is sized to the tallest label in the grid, which is the three-line one.
+   The gutters are wide on purpose — the skills are read one at a time, and air
+   is what stops thirty-two of them from reading as a wall of text. */
+.tagcloud{
+  position: relative;
+  display: grid;
+  /* The floor is set by one label: "распределёнными" is fifteen characters and
+     renders 159px wide at this size, and a column that only just clears it
+     leaves the word looking wedged against the plate. 186px is that word plus
+     room to breathe either side of it, which is what settles the grid at five
+     columns on a wide screen rather than six. */
+  grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 16px 18px;
+}
+/* The three groups are only a grouping in the markup. `display: contents`
+   drops the wrapper out of the box tree, so all thirty-two plates are direct
+   children of the grid and lay out as one continuous field. */
+.skills-group{ display: contents; }
+
+/* The plate, again for the no-script case. Not solid, so it sits in the block
+   rather than on top of it. Two shadows — a short one that gives the edge its
+   definition, and a long faint one that lifts the plate off the ground. Both
+   are the same near-black the type is mixed from, at low alpha, which keeps
+   them reading as shadow rather than as a grey border. */
+.tag{
+  position: relative;
+  /* Fills its cell and centres the label in it. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(20, 23, 28, 0.05);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow:
+    0 1px 2px rgba(20, 23, 28, 0.05),
+    0 8px 20px rgba(20, 23, 28, 0.05);
+  font-family: var(--font-body);
+  /* One size for all of them, and the same grey the running text is set in
+     everywhere else on the page. Nothing in this list outranks anything else
+     in it, so nothing is given the type or the colour to claim otherwise. */
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 260ms ease;
+}
+.tag-in{
+  display: block;
+  color: var(--ink-soft);
+  /* The label wraps inside its own plate rather than carrying line breaks of
+     its own: the same markup then fits a grid six columns wide and one two
+     columns wide. `balance` is what stops a three-word label from breaking
+     into two full lines and a stray word. */
+  text-align: center;
+  text-wrap: balance;
+  /* Last resort only — it breaks a word solely when the word cannot fit its
+     line at all, which the sizing above is there to prevent. */
+  overflow-wrap: break-word;
+}
+/* Lit: the plate grows a little and rises, and its shadow lengthens under it
+   as it goes. That is the whole of it — no colour, nothing else moves. Only
+   where there is a pointer to do the lifting and room to show it. Raised over
+   its neighbours, or it would grow underneath them. */
+@media (hover: hover) and (min-width: 721px){
+  .tag:hover{
+    transform: scale(1.14) translateY(-2px);
+    box-shadow:
+      0 2px 6px rgba(20, 23, 28, 0.07),
+      0 16px 34px rgba(20, 23, 28, 0.14);
+    z-index: 3;
+  }
+}
+
+/* ---- The sphere ----
+   The same thirty-two labels, laid on a turning ellipse instead of a grid: the
+   reference is an icon cloud, and here the icons are the words themselves. At
+   every width — on a phone the block is this same cloud, stood on end.
+   The plate goes: on the reference nothing sits behind the icons, and a shadow
+   under a word that is turning away from you reads as a mistake rather than as
+   depth. Depth here is size, opacity, focus and colour.
+   Everything positional is written by the script as an inline transform, so
+   nothing in this rule tries to place a tag; what is left is what a tag looks
+   like once it has been placed. */
+.tagcloud.is-sphere{
+  /* The height is the script's: it follows the radii, which follow the width
+     of the block and what the viewport has left. The rest of this undoes the
+     grid and, on a phone, the track the same element is without the script —
+     two classes beat one, so these win wherever those rules apply. */
+  display: block;
+  position: relative;
+  gap: 0;
+  padding: 0;
+  overflow: visible;
+  scroll-snap-type: none;
+  contain: none;
+}
+.tagcloud.is-sphere .skills-group{ display: contents; }
+.tagcloud.is-sphere .tag{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  /* No ceiling on the width: anything of two words or more is broken into
+     lines by the script, at the points that make them closest in width, so the
+     box is as wide as its widest line and no wider. */
+  width: max-content;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 21.63px;
+  /* A step above the plates' 700 — the label carries no ground of its own
+     here, and at the back of the turn it is pale, small and soft, so the
+     stroke is the only weight it has left. */
+  font-weight: 800;
+  /* Nothing here transitions: position, size, colour and blur are all
+     rewritten from the depth of the label every frame, and a transition on
+     top of that would only drag them behind where the label actually is. */
+  transition: none;
+  cursor: default;
+  will-change: transform, opacity, filter;
+}
+/* The breaks are the script's, so nothing here may re-wrap the label; the
+   colour is the script's too, mixed from how far off the label has turned. */
+.tagcloud.is-sphere .tag-in{
+  text-wrap: nowrap;
+  color: inherit;
+}
+.tagcloud.is-sphere .tag:hover{ box-shadow: none; }
+
+/* ---- The grip ----
+   Where a finger turns the cloud. Only on a touch screen, and only over the
+   middle of the block: a drag anywhere else has to stay the page's, or the
+   block would become a hole you cannot scroll past. `touch-action: none` is
+   what claims the gesture — no preventDefault, no fighting the scroller.
+   Invisible, and hidden from assistive tech: it is a handle for a decoration,
+   and the labels under it are the content. */
+.tagcloud-grip{ display: none; }
+@media (hover: none){
+  .tagcloud-grip{
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(62%, 280px);
+    height: min(56%, 340px);
+    transform: translate(-50%, -50%);
+    /* Over every label, so the gesture is never intercepted by one of them. */
+    z-index: 300;
+    touch-action: none;
+    background: none;
+  }
+  /* No pointer, no hover: nothing in the cloud answers a touch, and with the
+     labels out of the way the grip has the gesture to itself. */
+  .tagcloud.is-sphere .tag{ pointer-events: none !important; }
+}
+
+/* On a phone the block is portrait, so the cloud is too — the script narrows
+   the horizontal radius and stretches the vertical one. The type comes down
+   with the screen: at 21.63px the longest label would be most of the width of
+   the phone on its own. */
+@media (max-width: 720px){
+  .tagcloud.is-sphere{
+    /* Edge to edge: the negative margin is the paged track's and is kept, so
+       the cloud has the whole width of the screen to turn in rather than the
+       text column. */
+    padding: 0;
+  }
+  .tagcloud.is-sphere .tag{ font-size: clamp(11.5px, 3.4vw, 15px); }
+}
+
+/* ============ Contact (highlighted) ============ */
+/* Two layers. Underneath, the panel itself: light at the head, dark at the
+   foot. Over it, a darkening running up the diagonal from the bottom-right
+   corner — the corner the picture sits in — for the notebook to stand against.
+   That one is a background layer rather than an element, so it passes
+   underneath the photograph rather than round it, and it has no edge of its
+   own, only a fade, so there is never a line for the notebook's outline to
+   meet. The diagonal is what lets it stay on at every width: the dark corner
+   is the picture's corner on a desktop and on a phone alike, and the copy is
+   always in the opposite one, where the fade has already run out. */
+.contact-section{
+  background:
+    linear-gradient(to top left,
+      rgba(0, 20, 18, 0.52) 0,
+      rgba(0, 20, 18, 0.30) 16%,
+      rgba(0, 20, 18, 0.10) 34%,
+      rgba(0, 20, 18, 0) 54%),
+    linear-gradient(160deg, var(--accent-panel), var(--accent-deep));
+  color: #fff;
+}
+/* On a phone the picture is not in a corner — it is the full width of the foot
+   of the block, with the copy stacked above it. So the darkening is stacked
+   too: straight up from the bottom edge, same spread, same strength. */
+@media (max-width: 900px){
+  .contact-section{
+    background:
+      linear-gradient(to top,
+        rgba(0, 20, 18, 0.52) 0,
+        rgba(0, 20, 18, 0.30) 16%,
+        rgba(0, 20, 18, 0.10) 34%,
+        rgba(0, 20, 18, 0) 54%),
+      linear-gradient(160deg, var(--accent-panel), var(--accent-deep));
+  }
+}
+.contact-section .block-title{ color: #fff; }
+.contact-section .section-sub{ color: rgba(255,255,255,0.84); }
+.contact-grid{
+  display: grid;
+  column-gap: 56px;
+  /* No row gap: the title carries its own 40px underneath it, and the picture
+     takes the gap it needs as a margin where it actually needs one. */
+  row-gap: 0;
+}
+/* The title and the copy are separate grid items now, so the subtitle's top
+   margin no longer collapses into the title's bottom one — it would simply add
+   to it. Dropped, which leaves the 40px the title already sets, exactly the
+   spacing there was before. */
+.contact-grid .section-sub{ margin-top: 0; }
+/* Two columns where there is room for them, contacts left and the picture
+   right; below that the grid stays one column and the picture, being last in
+   the source, falls to the foot of the block on its own. Centred against the
+   contacts rather than stretched: the illustration is much wider than it is
+   tall, and letting it fill the column height would blow the block up. */
+@media (min-width: 901px){
+  .contact-grid{
+    /* The picture takes the larger share: the contacts are three short lines
+       and need far less width than they were being given. The floor on the
+       first column is what stops the longest contact row — the Telegram
+       handle and its label, 252px together — from being squeezed out of it on
+       a narrow desktop. */
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.646fr);
+    align-items: start;
+  }
+  /* Placed rather than flowed: the title takes the first row on its own, and
+     the copy and the picture share the second. That is what puts the top of
+     the picture on the top of the copy — no offset to keep in step with the
+     heading, which is set in vw and changes size with the window. */
+  .contact-grid > .block-title{ grid-column: 1; grid-row: 1; }
+  .contact-grid > .contact-intro{ grid-column: 1; grid-row: 2; }
+  .contact-grid > .contact-art{ grid-column: 2; grid-row: 2; }
+  /* Out to the outer edge of the container, past the gutter the text columns
+     stop at. The picture is the one thing in the block with no left edge of its
+     own to line up with anything, so it is the one thing that can go there. */
+  .contact-art{ margin-right: calc(var(--wrap-pad) * -1); }
+}
+/* The row gap the grid used to provide, put back where the phone needs it. */
+@media (max-width: 900px){
+  .contact-art{ margin-top: 56px; }
+}
+.contact-art img{
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The background was cut out of the photograph, so the notebook would
+     otherwise float with nothing under it. Three shadows rather than one: what
+     makes an object read as lying on a surface is not how soft its shadow is
+     but how tight the darkest part of it is. So the first is almost directly
+     under the notebook, short and dark — that is the line of contact. The
+     second carries it a little further, and only the third is wide and faint,
+     which is where the softness comes from. A single long, offset shadow —
+     what was here before — is exactly what makes a thing look as if it were
+     hovering above the page.
+     Down and to the right, following the light in the picture. drop-shadow
+     rather than box-shadow: it follows the alpha silhouette, so what is cast
+     is the shape of the notebook and not a rectangle. */
+  filter:
+    drop-shadow(0 2px 3px rgba(0, 10, 9, 0.75))
+    drop-shadow(2px 5px 9px rgba(0, 10, 9, 0.5))
+    drop-shadow(4px 9px 20px rgba(0, 10, 9, 0.32));
+}
+.contact-list{ display: flex; flex-direction: column; gap: 16px; margin: 28px 0 20px; }
+.contact-list li{ display: flex; align-items: baseline; gap: 14px; }
+.contact-label{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  width: 76px;
+  flex: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.contact-list a{
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+.contact-list a:hover{ opacity: 0.8; border-color: #fff; }
+
+/* ============ Scroll reveal ============ */
+.reveal{
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.is-visible{ opacity: 1; transform: translateY(0); }
+
+/* ============ Motion items ============
+   For blocks that both arrive on entry and drift out on exit. The two effects
+   want the same property, so the offsets are composed into one transform and
+   the entrance animates a registered custom property rather than `transform`
+   itself. Without @property the arrival snaps into place instead of sliding —
+   the fade still runs, which is a reasonable floor. */
+@property --enter-y{ syntax: '<length>'; inherits: false; initial-value: 22px; }
+
+.motion-item{
+  --enter-y: 22px;
+  opacity: 0;
+  transform: translate3d(0, calc(var(--enter-y) + var(--parallax-y, 0px)), 0);
+  filter: blur(var(--parallax-blur, 0px));
+  transition:
+    opacity 560ms ease var(--enter-delay, 0ms),
+    --enter-y 560ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--enter-delay, 0ms);
+}
+/* Two ways in: the class on an ancestor section reveals everything inside it
+   at once, or on the item itself when a block is tall enough to need each
+   piece triggered as it reaches the fold. */
+.is-in .motion-item,
+.motion-item.is-in{ --enter-y: 0px; opacity: 1; }
+
+@media (prefers-reduced-motion: reduce){
+  .motion-item{
+    --enter-y: 0px;
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* ============ Responsive ============ */
+/* The aside layout gives up its second column early: this is the width at
+   which the card stops growing, and below it the copy narrows enough to grow
+   past the screenshots and leave a hole under them. */
+@media (max-width: 1140px){
+  .case--aside{ display: flex; }
+  .case--aside .case-media{ padding: 20px 20px 0; }
+  .case--aside .case-body{ padding: 20px 32px 32px; }
+  .case--aside .case-shots{ align-items: center; }
+  /* Equal widths would give two shots of different proportions two different
+     heights; proportional widths give them one. */
+  .case--aside .case-shots--fill img{ flex: var(--gr, var(--ar)) 1 0; }
+  /* Stacked, the strip has the whole card to grow into — and at 1024px that
+     is a 733px-tall pair of screenshots. Capped, it keeps the proportions of
+     the two-column version instead. */
+  .case--aside .case-shots--fill{ max-width: 620px; }
+}
+@media (max-width: 900px){
+  /* Stack: copy on top, photo below and still bottom-flush. */
+  .hero{
+    min-height: calc(100dvh - var(--header-h));
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+  /* Sized by HEIGHT here, not width: the portrait then always claims the
+     same share of the screen, so the gap between the copy and the photo
+     can't reopen on a taller handset the way width-based sizing let it. */
+  .hero-photo-wrap{
+    right: 50%;
+    transform: translate3d(50%, var(--parallax-y, 0px), 0);
+    /* aspect-ratio gives the absolutely-positioned box a definite width from
+       its height — width:auto alone leaves it indeterminate and the portrait
+       stretches. Matches the asset's own 675x687. */
+    height: 56%;
+    width: auto;
+    aspect-ratio: 675 / 687;
+  }
+  .hero-photo-wrap picture{ height: 100%; width: 100%; }
+  .hero-photo{ height: 100%; width: 100%; object-fit: contain; }
+  /* The desktop lift would tuck the wordmark under the sticky header here. */
+  .hero-title{
+    margin-top: 0;
+    font-size: clamp(2.9rem, 13vw, 4.8rem);
+  }
+  .hero-lead{
+    max-width: 40ch;
+    margin-top: 28px;
+    font-size: clamp(16px, 4.4vw, 18px);
+  }
+  .about-grid{ grid-template-columns: 1fr; gap: 32px; }
+  /* Two-up; the fifth card centres itself on tracks 4–9. */
+  .advantage-card{ grid-column: span 6; }
+  .advantage-card:nth-child(4){ grid-column: auto / span 6; }
+  .advantage-card:nth-child(5){ grid-column: 4 / span 6; }
+  .tagcloud{ gap: 14px 16px; }
+  .about-footnote{ grid-template-columns: 1fr 1fr; }
+  .case-head{ padding: 22px 24px; }
+  .case-body{ padding: 18px 24px 26px; }
+  .case-media{ padding: 18px 18px 0; }
+  .case--aside .case-media{ padding: 18px 18px 0; }
+  .case--aside .case-body{ padding: 18px 24px 26px; }
+  /* Below this the award has no column to sit in — it drops under the copy,
+     and with nothing beside it there is no line left to align to, so it goes
+     back to sizing itself. */
+  .case-cols--split{ grid-template-columns: 1fr; gap: 26px; }
+  /* Stacked under the copy, there is no column left to line up with. */
+  .case-award-slot{ position: static; min-height: 0; max-width: 420px; margin: 0; }
+  .case-cols--quoted .case-award-slot{ margin-bottom: 0; }
+  .case-award{ position: static; }
+  .case-award-shot{ height: auto; }
+  .case-award-shot img{ height: auto; }
+}
+
+@media (max-width: 720px){
+  :root{ --wrap-pad: 20px; }
+  .nav{ display: none; }
+  .burger{ display: flex; }
+  /* Full-screen overlay. width:100% is load-bearing: the desktop rule sets
+     an explicit --hero-photo-w width, which would otherwise win over
+     inset:0 and leave the old floating panel. */
+  .nav.is-open{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    background: var(--bg);
+    padding: 96px 20px 48px;
+    /* Keeps 8px+ of dead space between adjacent touch targets. */
+    gap: 10px;
+    /* Under the brand and the close button, which stay reachable on top. */
+    z-index: 1;
+  }
+  .nav.is-open a{
+    /* display:block so ::first-letter has a block container to apply to. */
+    display: block;
+    font-family: var(--font-display);
+    font-size: 26px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--ink-dim);
+    padding: 16px 24px;
+  }
+  /* Matches the accent initial used on the section headings. */
+  .nav.is-open a::first-letter{ color: var(--accent); }
+  .brand,
+  .burger{ position: relative; z-index: 2; }
+  /* Freezes the page behind the overlay so scrolling can't run underneath. */
+  body.menu-open{ overflow: hidden; }
+  .section{ padding: 60px 0; }
+  /* One under another, numeral still to the left of its own copy. */
+  .advantages-grid{ gap: 44px 0; }
+  .advantage-card,
+  .advantage-card:nth-child(4),
+  .advantage-card:nth-child(5){ grid-column: auto / span 12; }
+  .about-footnote{ grid-template-columns: 1fr; gap: 20px; }
+  .block-head{ flex-direction: column; align-items: flex-start; gap: 16px; }
+  /* Dates drop under the company instead of competing with it for a
+     280px-wide row; the chevron keeps its place on the first line. */
+  /* The rail keeps a narrower gutter; the tiles take the rest. */
+  .timeline{ padding-left: 32px; gap: 10px; }
+  .timeline::before{ left: 6px; }
+  .job-summary::before{ left: -32px; width: 14px; height: 14px; }
+  .job-summary{
+    grid-template-columns: 1fr 22px;
+    align-items: start;
+    gap: 6px 14px;
+    padding: 18px;
+  }
+  /* Both chips are nowrap, so their combined min-content was wider than the
+     tile and pushed the 1fr column — and the chevron with it — past the
+     right edge. Letting the row wrap is what keeps the grid inside. */
+  .job-summary > *{ min-width: 0; }
+  .job-when{
+    grid-column: 1;
+    grid-row: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-top: 8px;
+  }
+  .job-chevron{ grid-column: 2; grid-row: 1; margin-top: 2px; }
+  .job-panel-inner{ padding: 20px 18px 26px; }
+  /* The generic rule above stacks every block head on small screens, which is
+     right for a heading on its own — but the projects head carries the
+     carousel arrows, and they belong opposite the title the way they sit on
+     desktop, not dropped underneath it. "ПРОЕКТЫ" is 150px at this size and
+     the pair of buttons 104px, so the row still fits a 320px screen. */
+  .portfolio-section .block-head{
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .case-track{ gap: 16px; padding-bottom: 16px; }
+  .case-body{ padding: 22px 18px 26px; }
+  .case-media{ padding: 20px 16px; }
+  .case-shots{ gap: 10px; }
+  /* Four phone screens will not sit in one row on a phone — they wrap, and
+     a shorter shared height is what keeps the wrapped rows readable. */
+  .case-shots img{ height: clamp(150px, 44vw, 230px); }
+  .case-shots img:only-child{ max-height: 300px; }
+  /* Two columns is what a phone has room for: the longest single word in the
+     list is fifteen characters, and a third column would cut the plate below
+     what that word needs. Smaller type and tighter gutters buy back some of
+     the height that costs. */
+  /* ---- Paged ----
+     Still the no-script case, and only that: with the script the cloud rules
+     above take the element over at every width. Thirty-two plates down a phone
+     is about three screens of scrolling, so here the grid becomes three pages
+     side by side to be swiped through. The grid container turns into the
+     scroller itself; the groups, `display: contents` elsewhere, come back as
+     real boxes and each takes a full screen. It bleeds to the viewport edges
+     so a swipe can start at the screen edge, and the padding puts the plates
+     back on the site grid. */
+  .tagcloud{
+    --tag-fs: clamp(12.5px, 3.6vw, 14.5px);
+    display: flex;
+    align-items: flex-start;
+    /* A gutter between pages, so what shows past the right edge of the screen
+       is clear air and the start of the next page, not one of its plates cut
+       in half. Same figure the projects track uses at this width. */
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--wrap-pad);
+    margin: 0 calc(var(--wrap-pad) * -1);
+    /* The bottom padding is the plates' own shadow: it falls 8px and blurs
+       20, so it reaches 18px below the last row, and paint containment would
+       cut it off square against the edge of the track. */
+    padding: 4px var(--wrap-pad) 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* No height of its own: the flex box takes the height of its tallest page
+       and keeps it. The last page is five plates short of the others, and a
+       track that resized to fit it would drag the contact panel up the screen
+       every time you reached the end. */
+    /* Three pages of plates are a few thousand pixels wide. Clipping the axis
+       is not enough on its own — the figure still reached the page's own
+       scroll width and took the whole site sideways with it, which is the
+       same leak the projects track had. Paint containment states the intent
+       instead of leaning on a transform that reduced motion may remove. */
+    contain: paint;
+  }
+  .tagcloud::-webkit-scrollbar{ display: none; }
+  .tagcloud:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius); }
+  .skills-group{
+    display: grid;
+    /* Two columns flat, not `auto-fit`: inside a page of known width there is
+       nothing to fit to, and the count should not drift between pages. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Stated, not `1fr`. Each page is its own grid now, and `1fr` sizes rows
+       to the tallest label in *that* grid — the three-line one lives on page
+       one, so its plates came out 81px and the other two pages' 63px, which
+       is exactly the mismatch equal tiles are supposed to rule out. Three
+       lines of type plus the plate's own padding and border, worked out from
+       the same size the type is set in, holds every page to one figure. */
+    grid-auto-rows: calc(var(--tag-fs) * 3.9 + 26px);
+    gap: 10px;
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+  /* The shared rule stacks the head's children; there is only the heading in
+     it here, so it is laid across instead and allowed to break over two lines
+     rather than being squeezed. */
+  .skills .block-head{
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .skills .block-title{ min-width: 0; }
+  .tag{ padding: 12px 12px; border-radius: 12px; }
+  /* Tied to the viewport, for the same reason the columns have a floor: two
+     cells on a phone are about 170px wide, and the longest word has to sit
+     inside that with air either side of it. It stops growing at 403px, where
+     the word has all the room it needs. Held in a property because the row
+     height above is worked out from it. */
+  .tag{ font-size: var(--tag-fs); }
+  /* A logo column beside a phone-width text column leaves the text about twenty
+     characters wide, so the logo goes above its description instead — and with
+     the whole content width to itself it runs the full measure. */
+  .multi-row{ grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .multi-logo img{ width: 100%; max-height: none; }
+  /* Full width still, but two per row: four across a phone would leave each
+     screenshot about 66px wide. The basis forces the break, and the ratios
+     still deal out the width within each row. */
+  .case-shots--fill{ flex-wrap: wrap; }
+  .case-shots--fill img{ flex: var(--ar) 1 calc(50% - 5px); height: auto; }
+  /* Once the strip wraps, the pieces are no longer one picture, so they take
+     the same gutter — and the same corners — as every other pair of shots. */
+  .case-shots--seam{ gap: 10px; }
+  .case-shots--seam img,
+  .case-shots--seam img:first-child,
+  .case-shots--seam img:last-child{ border-radius: 6px; }
+  /* A desktop screen and a phone screen in one strip: side by side the wide
+     one would come out 200px across with its table unreadable, so each piece
+     takes a row of its own. The cap is a height limit written as a width —
+     ratio × height — which leaves the wide piece at full width and stops the
+     narrow one from towering over the card. */
+  .case-shots--stack img{ flex: 0 0 100%; max-width: calc(var(--ar) * 620px); }
+  .case-name{ font-size: 24px; }
+  .case-text{ font-size: 14px; }
+  /* Name, subtitle and the case link stop fitting one row here. */
+  .case-head{ padding: 18px; }
+  .case-title{ gap: 2px 12px; }
+  .case-body{ padding: 14px 18px 22px; }
+  .case-media{ padding: 14px 14px 0; }
+  /* Fifteen segments across a phone leaves each about 20px wide — under the
+     24px target guideline, but swiping is the primary gesture on touch and
+     the arrows are still there. */
+  .case-steps{ gap: 3px; }
+  .case-subhead{ font-size: 16px; }
+}
