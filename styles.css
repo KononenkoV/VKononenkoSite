@@ -34,6 +34,13 @@
 
   --container: 1160px;
   --wrap-pad: 28px;
+  /* How much of the neighbouring slide shows past the projects carousel, on
+     each side. A snapped slide starts one gutter in from the edge of the
+     screen, so what is left over for its neighbour is the gutter less the
+     gap between them — which is why this is spent out of the gap and the
+     slide keeps the full width of the page grid. Stated once here so the
+     figure is the same on a phone as on a desktop, where the gutter is not. */
+  --case-peek: 12px;
   /* Shared by the hero portrait and the main nav so the menu spans exactly
      the photo's horizontal band. */
   --hero-photo-w: clamp(320px, 48vw, 620px);
@@ -324,8 +331,11 @@ img{ max-width: 100%; display: block; }
      stay in step. */
   opacity: 0.9;
   /* Tight radius + higher opacity reads as a crisp drop shadow rather than
-     the diffuse haze a wide blur gives at this text size. */
-  text-shadow: 0 2px 5px rgba(20, 23, 28, 0.48);
+     the diffuse haze a wide blur gives at this text size. Ten points lighter
+     than it was: over the pale ground the copy sits on, the shadow only has to
+     lift the type off the page, and past this it starts to read as the type
+     being blurred rather than raised. */
+  text-shadow: 0 2px 5px rgba(20, 23, 28, 0.38);
   margin: 52px 0 0;
 }
 
@@ -643,6 +653,15 @@ img{ max-width: 100%; display: block; }
      most of a screen before anything is even opened. */
   line-height: 1.2;
   color: #fff;
+  /* One employer here is «АО «Обнинскоргсинтез»», and at this size that word
+     alone is wider than the chip on a 360px phone — so it hangs over the edge
+     with nothing in the markup able to prevent it. The page is `lang="ru"`, so
+     `hyphens` gives it a proper Russian break with a hyphen shown; break-word
+     is the floor under that, for a browser with no dictionary to hyphenate
+     with. Both only ever act on a word that does not fit at all. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
 }
 .job-role{
   display: block;
@@ -805,7 +824,7 @@ img{ max-width: 100%; display: block; }
 }
 .case-track{
   display: flex;
-  gap: 24px;
+  gap: calc(var(--wrap-pad) - var(--case-peek));
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   /* Slides keep their own height instead of stretching to the tallest. The
@@ -1048,12 +1067,15 @@ img{ max-width: 100%; display: block; }
    being comfortable, so it stays the default — but a write-up of four long
    paragraphs stacks into a card half again as tall as its neighbours, and in a
    carousel where every slide is read at the same scroll position that height
-   costs more than the ideal line length does. Only the description opts out:
-   the client quote below it keeps its own cap, since it is a short block and
-   is set two sizes smaller. Desktop only — below 900px the holder is already
-   narrower than the cap, so the rule would have nothing to undo. */
+   costs more than the ideal line length does. The quote goes with it: it sits
+   directly under the description in the same column, under a heading of the
+   same weight, so a card where one runs the full width and the other stops
+   two thirds of the way across reads as a mistake rather than as a measure.
+   Desktop only — below 900px the holder is already narrower than the cap, so
+   the rule would have nothing to undo. */
 @media (min-width: 901px){
-  .case--fulltext .case-text{ max-width: none; }
+  .case--fulltext .case-text,
+  .case--fulltext .case-quote{ max-width: none; }
 }
 
 /* ---- Several projects on one card ----
@@ -1150,7 +1172,13 @@ img{ max-width: 100%; display: block; }
 
 .case-quote blockquote{
   margin: 0;
-  font-size: 14px;
+  /* The same type as the description above it. The quote used to be set two
+     steps down, on the reasoning that it is someone else's voice and should
+     not compete — but the two blocks sit one under the other in the same
+     column, under headings of equal weight, and at two different sizes that
+     reads as one of them being a footnote rather than as a change of speaker.
+     What separates them is the heading; it does not need the size as well. */
+  font-size: 16px;
   line-height: 1.6;
   color: var(--ink-soft);
 }
@@ -1307,6 +1335,16 @@ img{ max-width: 100%; display: block; }
    is what stops thirty-two of them from reading as a wall of text. */
 .tagcloud{
   position: relative;
+  /* The words are a moving decoration, not a passage to read: a drag across
+     them is meant to turn the cloud, and on a phone a press-and-hold is meant
+     to grab it. Without this both gestures end in a blue selection instead —
+     the label under the finger gets highlighted and the turn is lost. Off on
+     every device for the same reason, and the callout iOS raises on a long
+     press goes with it. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
   display: grid;
   /* The floor is set by one label: "распределёнными" is fifteen characters and
      renders 159px wide at this size, and a column that only just clears it
@@ -1822,7 +1860,7 @@ img{ max-width: 100%; display: block; }
     justify-content: space-between;
     gap: 16px;
   }
-  .case-track{ gap: 16px; padding-bottom: 16px; }
+  .case-track{ padding-bottom: 16px; }
   .case-body{ padding: 22px 18px 26px; }
   .case-media{ padding: 20px 16px; }
   .case-shots{ gap: 10px; }
